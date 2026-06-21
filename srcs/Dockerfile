@@ -1,1 +1,1 @@
-FROM debian:bullseye
+FROM debian:bookworm
