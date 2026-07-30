@@ -1,0 +1,10 @@
+dockker running a deamon or persistent process that all this magic work, and give
+as os level virtualization
+
+
+Dockerfile is a blueprint that tells Docker ro configure the env that runs your application, the used to build an image wich conatains an OS your dependencies and your code like a template for running your application and we can upload this image to the cloud to a places like dockerhub
+
+an image by itself doesn't do anything you need to run as a container which itself is an isolated package running your code that un theory could scale infinitely in 
+the cloud containers are stateless wich means when they shutdown all the data inside
+them is lost , but that makes them portable and they can run on every major Cloud 
+platform without vendor lock in 

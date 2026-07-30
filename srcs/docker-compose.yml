@@ -1,2 +1,30 @@
 services:
+  mariadb:
+    # image: mariadb #this will download offical mriadb for docker hub
+    build: ./requirement/mariadb # means Go into requirements/mariadb/ and build the image using the Dockerfile found there.
+    restart: always
+    vloumes:
+      - mariadb_data:/var/lib/mysql
+    networks:
+      - inception
+  nginx:
+    build: ./requirement/nginx
+    ports:
+      - "443:443"
+    depends_on:
+      - wordpress
+    networks:
+      - inception
   
+  wordpress:
+    build: ./requirement/wordpress
+    depends_on:
+      - mariadb
+    networks:
+      - inception
+
+
+volumes:
+  mariadb_data:
+networks
+  inception:

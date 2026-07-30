@@ -1,8 +1,0 @@
-FROM Debian:bookworm
-
-RUN sudo apt update -y && sudo apt upgrade -y && sudo apt install mariadb-server mariadb-client galera-4 -y
-
-COPY ./config/mariadb.conf .
-
-
-# sudo mariadb-secure-installation
