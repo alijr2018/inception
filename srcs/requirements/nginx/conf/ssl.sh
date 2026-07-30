@@ -22,7 +22,7 @@ openssl req \
   -key "$SSL_DIR/nginx.key" \
   -out "$SSL_DIR/nginx.csr" \
   -subj "/C=MA/ST=Khouribga/L=Khouribga/O=1337/CN=${DOMAIN_NAME}"
-
+    # -addext "subjectAltName=DNS:${DOMAIN_NAME}" # add it for new machine but idk
 # Sign certificate with CA
 openssl x509 \
   -req \
