@@ -32,11 +32,11 @@ if [ ! -d "/var/lib/mysql/mysql" ]; then
         sleep 1
     done
 
-    mysql --socket=/run/mysqld/mysqld.sock -u root << EOF
+mysql --socket=/run/mysqld/mysqld.sock -u root <<EOF
 ALTER USER 'root'@'localhost' IDENTIFIED BY '${MARIADB_ROOT_PASSWORD}';
-CREATE DATABASE IF NOT EXISTS ${MARIADB_DATABASE};
+CREATE DATABASE IF NOT EXISTS \`${MARIADB_DATABASE}\`;
 CREATE USER IF NOT EXISTS '${MARIADB_USER}'@'%' IDENTIFIED BY '${MARIADB_PASSWORD}';
-GRANT ALL PRIVILEGES ON ${MARIADB_DATABASE}.* TO '${MARIADB_USER}'@'%';
+GRANT ALL PRIVILEGES ON \`${MARIADB_DATABASE}\`.* TO '${MARIADB_USER}'@'%';
 FLUSH PRIVILEGES;
 EOF
 
