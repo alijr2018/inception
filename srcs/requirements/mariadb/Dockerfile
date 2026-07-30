@@ -4,6 +4,7 @@ FROM debian:bullseye
 # RUN mean Executes a command while building the image.
 RUN apt update -y  && apt upgrade -y && apt install -y mariadb-server mariadb-client galera-4 
 
+RUN mkdir -p /run/mysqld && chown -R mysql:mysql /run/mysqld 
 # RUN mkdir -p /run/mysqld && chown -R mysql:mysql /run/mysqld && chown 755 /var/run/mysqld
 # COPY conf/mariadb.cnf /etc/mysql/mariadb.conf.d/50-server.cnf
 

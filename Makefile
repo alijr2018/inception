@@ -23,3 +23,15 @@ restart:
 clean:
 # 	docker compose down -v
 	docker compose -f ./srcs/docker-compose.yml down -v
+# Remove all containers (including stopped ones)
+# 	docker rm -f $(docker ps -aq)
+# Remove all images
+# 	docker rmi -f $(docker images -aq)
+# Remove unused volumes
+# 	docker volume prune -f
+# Remove unused networks
+# 	docker network prune -f
+# Remove build cache
+# 	docker builder prune -a -f
+#it rm all 
+	docker system prune -a --volumes -f
