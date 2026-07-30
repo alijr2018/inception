@@ -36,7 +36,7 @@ services:
   #   networks:
   #     - inception
 
-
+# add to store the db and nginx in the locally and bind network
 volumes:
   mariadb_data:
 networks:
