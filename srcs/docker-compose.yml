@@ -17,14 +17,17 @@ services:
       - mariadb_data:/var/lib/mysql
     networks:
       - inception
-  # nginx:
-  #   build: ./requirements/nginx
-  #   ports:
-  #     - "443:443"
-  #   depends_on:
-  #     - wordpress
-  #   networks:
-  #     - inception
+  nginx:
+    build: ./requirements/nginx
+    ports:
+      # - "80:80"
+      - "443:443"
+    depends_on:
+      - wordpress
+    volumes:
+      - wordpress:/var/wwww/html
+    networks:
+      - inception
   
   # wordpress:
   #   build: ./requirements/wordpress
