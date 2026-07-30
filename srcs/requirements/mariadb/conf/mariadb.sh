@@ -1,3 +1,5 @@
+#!/bin/bash
+
 # sudo mariadb-secure-installation
 # 
 # sudo systemctl status mariadb
@@ -31,7 +33,7 @@ done
 
 mysql --socket=/run/mysqld/mysqld.sock -u root << EOF
 ALTER USER 'root'@'localhost' IDENTIFIED BY '${MARIADB_PASSWORD}';
-CREATE DATABASE IF NO EXISTS ${MARIADB_DATABASE};
+CREATE DATABASE IF NOT EXISTS ${MARIADB_DATABASE};
 CREATE USER IF NOT EXISTS '${MARIADB_USER}'@'%' IDENTIFIED BY '${MARIADB_PASSWORD}';
 GRANT ALL PRIVILEGES ON `${MARIADB_DATABASE}`.* TO '${MARIADB_USER}'@'%';
 FLUSH PRIVILEGES;
@@ -39,4 +41,4 @@ EOF
 
 mysqladmin --socket=/run/mysqld/mysqld.sock shutdown
 
-exec mysqld --user=mysql --datadir=/var/lib/mysql --socket=/run/mysqld/mysql.sock
+exec mysqld --user=mysql --datadir=/var/lib/mysql --socket=/run/mysqld/mysqld.sock

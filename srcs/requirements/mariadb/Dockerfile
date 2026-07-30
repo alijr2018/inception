@@ -8,7 +8,7 @@ RUN mkdir -p /run/mysqld && chown -R mysql:mysql /run/mysqld
 # RUN mkdir -p /run/mysqld && chown -R mysql:mysql /run/mysqld && chown 755 /var/run/mysqld
 # COPY conf/mariadb.cnf /etc/mysql/mariadb.conf.d/50-server.cnf
 
-COPY ./conf/mariadb.conf /usr/local/bin/mariadb.sh
+COPY ./conf/mariadb.sh /usr/local/bin/mariadb.sh
 
 RUN chmod +x /usr/local/bin/mariadb.sh
 
@@ -19,4 +19,4 @@ HEALTHCHECK --interval=30s --timeout=30s  --retries=3 CMD [ "mariadb-admin", "pi
 
 # CMD ["bash", "mariadb.conf"]
 # ENTRYPOINT [ "/usr/local/bin/mariadb.sh" ]
-ENTRYPOINT [ "mariadb.sh" ]
+ENTRYPOINT ["/usr/local/bin/mariadb.sh"]
