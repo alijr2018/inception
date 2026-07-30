@@ -2,29 +2,42 @@ services:
   mariadb:
     # image: mariadb #this will download offical mriadb for docker hub
     build: ./requirement/mariadb # means Go into requirements/mariadb/ and build the image using the Dockerfile found there.
-    restart: always
-    vloumes:
+    # restart: always #this form  https://hub.docker.com/_/mariadb
+    restart: unless-stopped
+
+    environment:
+      MARIADB_ROOT_PASSWOD : ${MARIADB_ROOT_PASSWOD}
+      MARIADB_DATABASE : ${MARIADB_DATABASE}
+      MARIADB_USER : ${MARIADB_USER}
+      MARIADB_PASSWOD : ${MARIADB_PASSWOD}
+
+    ports:
+      - "3306:3306"
+    volumes:
       - mariadb_data:/var/lib/mysql
     networks:
       - inception
-  nginx:
-    build: ./requirement/nginx
-    ports:
-      - "443:443"
-    depends_on:
-      - wordpress
-    networks:
-      - inception
+  # nginx:
+  #   build: ./requirement/nginx
+  #   ports:
+  #     - "443:443"
+  #   depends_on:
+  #     - wordpress
+  #   networks:
+  #     - inception
   
-  wordpress:
-    build: ./requirement/wordpress
-    depends_on:
-      - mariadb
-    networks:
-      - inception
+  # wordpress:
+  #   build: ./requirement/wordpress
+  #   depends_on:
+  #     - mariadb
+  #   networks:
+  #     - inception
 
 
 volumes:
   mariadb_data:
-networks
+networks:
   inception:
+    driver: bridge
+
+  

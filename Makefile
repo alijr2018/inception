@@ -4,7 +4,7 @@ all:
 
 build:
 # 	docker compose build -d // whts diff between up and build
-	docker compose -f ./srcs/docker-compose.yml -d // whts diff between up and build
+	docker compose -f ./srcs/docker-compose.yml  // whts diff between up and build
 
 down:
 # 	docker compose down           # Stop and remove containers
