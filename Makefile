@@ -1,14 +1,14 @@
 all:
 # 	docker compose up -d // spinn all conatiner simultaneously
-	docker compose -f ./srcs/docker-compose.yml up -d // spinn all conatiner simultaneously
+	docker compose -f ./srcs/docker-compose.yml up -d 
 
 build:
 # 	docker compose build -d // whts diff between up and build
-	docker compose -f ./srcs/docker-compose.yml  // whts diff between up and build
+	docker compose -f ./srcs/docker-compose.yml  
 
 down:
 # 	docker compose down           # Stop and remove containers
-	docker compose -f ./srcs/docker-compose.yml down           # Stop and remove containers
+	docker compose -f ./srcs/docker-compose.yml down
 
 stop:
 # 	docker compose stop
