@@ -1,37 +1,32 @@
-all:
-# 	docker compose up -d // spinn all conatiner simultaneously
-	docker compose -f ./srcs/docker-compose.yml up -d 
+COMPOSE_FILE = ./srcs/docker-compose.yml
+
+.PHONY: all up build down stop restart clean re logs ps
+
+all: up
+
+up:
+	docker compose -f $(COMPOSE_FILE) up -d --build
 
 build:
-# 	docker compose build -d // whts diff between up and build
-	docker compose -f ./srcs/docker-compose.yml  
+	docker compose -f $(COMPOSE_FILE) build
 
 down:
-# 	docker compose down           # Stop and remove containers
-	docker compose -f ./srcs/docker-compose.yml down
+	docker compose -f $(COMPOSE_FILE) down
 
 stop:
-# 	docker compose stop
-	docker compose -f ./srcs/docker-compose.yml stop
-
+	docker compose -f $(COMPOSE_FILE) stop
 
 restart:
-# 	docker compose restart
-	docker compose -f ./srcs/docker-compose.yml restart
-
+	docker compose -f $(COMPOSE_FILE) restart
 
 clean:
-# 	docker compose down -v
-	docker compose -f ./srcs/docker-compose.yml down -v
-# Remove all containers (including stopped ones)
-# 	docker rm -f $(docker ps -aq)
-# Remove all images
-# 	docker rmi -f $(docker images -aq)
-# Remove unused volumes
-# 	docker volume prune -f
-# Remove unused networks
-# 	docker network prune -f
-# Remove build cache
-# 	docker builder prune -a -f
-#it rm all 
-	docker system prune -a --volumes -f
+	docker compose -f $(COMPOSE_FILE) down -v --remove-orphans
+	docker system prune -af --volumes
+
+re: clean up
+
+logs:
+	docker compose -f $(COMPOSE_FILE) logs -f
+
+ps:
+	docker compose -f $(COMPOSE_FILE) ps
