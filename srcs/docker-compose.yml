@@ -14,7 +14,7 @@ services:
     ports:
       - "3306:3306"
     volumes:
-      - mariadb_data:/var/lib/mysql
+      - mariadb:/var/lib/mysql
     networks:
       - inception
   nginx:
@@ -38,8 +38,8 @@ services:
 
 # add to store the db and nginx in the locally and bind network
 volumes:
-  mariadb_data:
-  wordpress_data:
+  mariadb:
+  wordpress:
 networks:
   inception:
     driver: bridge
