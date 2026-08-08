@@ -43,4 +43,4 @@ EOF
     mysqladmin --socket=/run/mysqld/mysqld.sock shutdown
 fi
 
-exec mysqld --user=mysql --datadir=/var/lib/mysql --socket=/run/mysqld/mysqld.sock
+exec mysqld --user=mysql --datadir=/var/lib/mysql --socket=/run/mysqld/mysqld.sock --bind-address=0.0.0.0

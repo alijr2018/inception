@@ -1,4 +1,4 @@
-FROM debian:bullseye
+FROM debian:bookworm
 
 # RUN apt update -y  && apt upgrade -y && apt install mariadb-server -y
 # RUN mean Executes a command while building the image.

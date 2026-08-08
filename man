@@ -8,3 +8,20 @@ an image by itself doesn't do anything you need to run as a container which itse
 the cloud containers are stateless wich means when they shutdown all the data inside
 them is lost , but that makes them portable and they can run on every major Cloud 
 platform without vendor lock in 
+
+
+Username: osboxes
+Password: osboxes.org
+Root Account Password: osboxes.org
+
+
+| Field | Meaning             | Your value           |
+| ----- | ------------------- | -------------------- |
+| `C`   | Country             | `MO` = Morocco       |
+| `ST`  | State/Province      | `KH` = Khouribga     |
+| `O`   | Organization        | `42`                 |
+| `OU`  | Organizational Unit | `42`                 |
+| `CN`  | Common Name         | **Your domain name** |
+
+
+subjectAltName = DNS:abrami.42.fr

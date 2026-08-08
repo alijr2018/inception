@@ -13,7 +13,7 @@
 - Install Docker Engine + Docker Compose plugin on a Debian/Ubuntu VM.
 - Create the required directory structure (see subject).
 - Initialize a Git repo, add `.gitignore` for `.env` and `secrets/`.
-- Decide on base image: **Alpine 3.18** or **Debian 11 (bullseye)**.
+- Decide on base image: **Alpine 3.18** or **Debian 11 (bookworm)**.
 - Draft a preliminary `.env` file.
 
 ### What to search / learn
