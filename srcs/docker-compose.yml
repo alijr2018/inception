@@ -25,7 +25,7 @@ services:
     depends_on:
       - wordpress
     volumes:
-      - wordpress:/var/wwww/html
+      - wordpress:/var/www/html
     networks:
       - inception
   
@@ -33,6 +33,18 @@ services:
     build: ./requirements/wordpress
     depends_on:
       - mariadb
+    environment:
+      DB_HOST: ${DB_HOST}
+      DB_NAME: ${DB_NAME}
+      DB_USER: ${DB_USER}
+      DB_PASS: ${DB_PASS}
+      DOMAIN_NAME: ${DOMAIN_NAME}
+      WP_TITLE: ${WP_TITLE}
+      WP_ADMIN_USER: ${WP_ADMIN_USER}
+      WP_ADMIN_PASS: ${WP_ADMIN_PASS}
+      WP_ADMIN_EMAIL: ${WP_ADMIN_EMAIL}
+    volumes:
+      - wordpress:/var/www/html
     networks:
       - inception
 

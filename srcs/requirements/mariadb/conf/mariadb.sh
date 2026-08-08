@@ -1,38 +1,25 @@
 #!/bin/bash
 
-# sudo mariadb-secure-installation
-# 
-# sudo systemctl status mariadb
-# 
-# sudo systemctl start mariadb
-# 
-# mariadb -u root -p
-# 
-# /etc/my.cnf /etc/mysql/my.cnf ~/.my.cnf 
-# 
-
-
-# set -e
-
-# echo "Start MariaDB init"
-
-# mkdir -p /run/mysqld
-# chown mysql:mysql /run/mysqld
-
 set -e
 
-echo "Start MariaDB init"
+echo "Start MariaDB"
 
-if [ ! -d "/var/lib/mysql/mysql" ]; then
-    mysql_install_db --user=mysql --datadir=/var/lib/mysql > /dev/null
+if [ ! -d "/var/lib/mysql/.initialized" ]; then
+    echo "Init DB"
 
-    mysqld --user=mysql --datadir=/var/lib/mysql --socket=/run/mysqld/mysqld.sock &
+    rm -fr /var/lib/mysql/*
+
+#    mysql_install_db --user=mysql --datadir=/var/lib/mysql
+    mariadb-install-db --user=mysql --datadir=/var/lib/mysql
+
+    mysqld --user=mysql --datadir=/var/lib/mysql --socket=/run/mysqld/mysqld.sock --skip-networking &
 
     until mysqladmin ping --socket=/run/mysqld/mysqld.sock --silent; do
         sleep 1
     done
-
-mysql --socket=/run/mysqld/mysqld.sock -u root <<EOF
+    echo "DB is ready"
+    
+    mysql --socket=/run/mysqld/mysqld.sock -u root << EOF
 ALTER USER 'root'@'localhost' IDENTIFIED BY '${MARIADB_ROOT_PASSWORD}';
 CREATE DATABASE IF NOT EXISTS \`${MARIADB_DATABASE}\`;
 CREATE USER IF NOT EXISTS '${MARIADB_USER}'@'%' IDENTIFIED BY '${MARIADB_PASSWORD}';
@@ -40,7 +27,14 @@ GRANT ALL PRIVILEGES ON \`${MARIADB_DATABASE}\`.* TO '${MARIADB_USER}'@'%';
 FLUSH PRIVILEGES;
 EOF
 
-    mysqladmin --socket=/run/mysqld/mysqld.sock shutdown
+    mysqladmin --socket=/run/mysqld/mysqld.sock -u root  -p"${MARIADB_ROOT_PASSWORD}"  shutdown
+    touch /var/lib/mysql/.initialized
+    echo "MariaDB initialization complete"
+
+    else
+        echo "MariaDB already initialized"
 fi
+
+echo "Start Mariadb .."
 
 exec mysqld --user=mysql --datadir=/var/lib/mysql --socket=/run/mysqld/mysqld.sock --bind-address=0.0.0.0
