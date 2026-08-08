@@ -2,7 +2,7 @@ FROM debian:bookworm
 
 # RUN apt update -y  && apt upgrade -y && apt install mariadb-server -y
 # RUN mean Executes a command while building the image.
-RUN apt update -y  && apt upgrade -y && curl wget php8.2 php8.2-mysql php8.2-fpm mariadb-client
+RUN apt update -y  && apt upgrade -y && apt install curl wget php8.2 php8.2-mysql php8.2-fpm mariadb-client
 
 #why ???
 # RUN usermod -u 33 www-data && groupmod -g 33 www-data
