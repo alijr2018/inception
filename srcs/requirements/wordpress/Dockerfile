@@ -10,6 +10,9 @@ RUN curl -O https://raw.githubusercontent.com/wp-cli/builds/gh-pages/phar/wp-cli
 #why ???
 # RUN usermod -u 33 www-data && groupmod -g 33 www-data
 
+RUN sed -i 's|^listen = .*|listen = 0.0.0.0:9000|' /etc/php/8.2/fpm/pool.d/www.conf
+
+
 # RUN mkdir -p /run/mysqld && chown -R mysql:mysql /run/mysqld && chown 755 /var/run/mysqld
 # COPY conf/mariadb.cnf /etc/mysql/mariadb.conf.d/50-server.cnf
 WORKDIR /var/www/html

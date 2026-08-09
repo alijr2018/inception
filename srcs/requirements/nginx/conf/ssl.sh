@@ -5,9 +5,6 @@ set -e
 # cat << EOF > /etc/nginx/conf.d/default.conf
 
 cat << EOF > /etc/nginx/nginx.conf
-events {}
-
-http {
   server
   {
     listen 443 ssl;
@@ -25,7 +22,7 @@ http {
         fastcgi_pass wordpress:9000;
     }
   }
-}
+
 
 EOF
 
