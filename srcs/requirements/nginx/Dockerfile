@@ -1,5 +1,4 @@
-#debian:bookworm
-FROM debian:bookworm-slim
+FROM debian:bookworm
 
 # RUN apt update -y   && apt install mariadb-server -y
 # RUN mean Executes a command while building the image.
