@@ -54,7 +54,17 @@ services:
 # add to store the db and nginx in the locally and bind network
 volumes:
   mariadb:
+    driver: local
+    driver_opts:
+      type: none
+      o: bind
+      device: /home/${USER}/data/mariadb
   wordpress:
+    driver: local
+    driver_opts:
+      type: none
+      o: bind
+      device: /home/${USER}/data/wordpress
 networks:
   inception:
     driver: bridge

@@ -12,7 +12,7 @@ if [ ! -f "/var/lib/mysql/.initialized" ]; then
 #    mysql_install_db --user=mysql --datadir=/var/lib/mysql
     mariadb-install-db --user=mysql --datadir=/var/lib/mysql
 
-    mysqld --user=mysql --datadir=/var/lib/mysql --socket=/run/mysqld/mysqld.sock --skip-networking &
+    mysqld --user=mysql --datadir=/var/lib/mysql --socket=/run/mysqld/mysqld.sock &
 
     until mysqladmin ping --socket=/run/mysqld/mysqld.sock --silent; do
         sleep 1
