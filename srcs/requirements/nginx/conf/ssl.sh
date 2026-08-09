@@ -4,7 +4,11 @@ set -e
 
 # cat << EOF > /etc/nginx/conf.d/default.conf
 
-cat << EOF > /etc/nginx/nginx.conf
+mkdir -p /etc/nginx/ssl
+
+openssl req -x509 -nodes -days 365 -newkey rsa:2048 -keyout /etc/nginx/ssl/we.key -out /etc/nginx/ssl/we.crt -subj "/C=MO/ST=KH/O=42/OU=42/CN=abrami.42.fr"
+
+cat << EOF > /etc/nginx/conf.d/default.conf
   server
   {
     listen 443 ssl;
@@ -27,9 +31,6 @@ cat << EOF > /etc/nginx/nginx.conf
 EOF
 
 
-mkdir -p /etc/nginx/ssl
-
-openssl req -x509 -nodes -days 365 -newkey rsa:2048 -keyout /etc/nginx/ssl/we.key -out /etc/nginx/ssl/we.crt -subj "/C=MO/ST=KH/O=42/OU=42//CN=abrami.42.fr" -addext "subjectAltName=DNS:abrami.42.fr"
 
 nginx -t
 
