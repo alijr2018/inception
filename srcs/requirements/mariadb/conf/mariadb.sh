@@ -4,7 +4,7 @@ set -e
 
 echo "Start MariaDB"
 
-if [ ! -d "/var/lib/mysql/.initialized" ]; then
+if [ ! -f "/var/lib/mysql/.initialized" ]; then
     echo "Init DB"
 
     rm -fr /var/lib/mysql/*
