@@ -1,1 +1,2 @@
-FROM debian:bookworm
+#debian:bookworm
+FROM debian:bookworm-slim
