@@ -2,13 +2,13 @@
 
 set -e
 
-if [ ! -f /var/www/html/wp-load.php ]; then
-    cd /tmp
-    curl -O https://raw.githubusercontent.com/wp-cli/builds/gh-pages/phar/wp-cli.phar
-    php wp-cli.phar --info
-    chmod +x wp-cli.phar
-    mv wp-cli.phar /usr/local/bin/wp
-fi
+#if [ ! -f /var/www/html/wp-load.php ]; then
+#    cd /tmp
+#    curl -O https://raw.githubusercontent.com/wp-cli/builds/gh-pages/phar/wp-cli.phar
+#    php wp-cli.phar --info
+#    chmod +x wp-cli.phar
+#    mv wp-cli.phar /usr/local/bin/wp
+#fi
 
 if [ ! -f /var/www/html/wp-load.php ]; then
     cd /tmp
@@ -26,11 +26,11 @@ until mysqladmin ping -h"$DB_HOST" -u"$DB_USER" -p"$DB_PASS" --silent; do
 done
 
 if [ ! -f /var/www/html/wp-config.php ]; then
-    wp config create --path=/var/www/html --dbname="$DB_NAME" --dbuser="$DB_USER" --dbpass="$DB_PASS" --dbhost="$DB_HOST"
+    wp --allow-root config create --path=/var/www/html --dbname="$DB_NAME" --dbuser="$DB_USER" --dbpass="$DB_PASS" --dbhost="$DB_HOST"
 fi
 
-if ! wp core is-installed --path=/var/www/html ; then
-    wp core install --path=/var/www/html --url="$DOMAIN_NAME" --title="$WP_TITLE" --admin_user="$WP_ADMIN_USER" --admin_password="$WP_ADMIN_PASS"  --admin_email="$WP_ADMIN_EMAIL"
+if ! wp --allow-root core is-installed --path=/var/www/html ; then
+    wp --allow-root core install --path=/var/www/html --url="$DOMAIN_NAME" --title="$WP_TITLE" --admin_user="$WP_ADMIN_USER" --admin_password="$WP_ADMIN_PASS"  --admin_email="$WP_ADMIN_EMAIL"
 fi
 
 

@@ -1,8 +1,8 @@
 FROM debian:bookworm
 
-# RUN apt update -y  && apt upgrade -y && apt install mariadb-server -y
+# RUN apt update -y   && apt install mariadb-server -y
 # RUN mean Executes a command while building the image.
-RUN apt update -y  && apt upgrade -y && apt install -y nginx openssl 
+RUN apt update -y   && apt install -y nginx openssl 
 
 #why ???
 # RUN usermod -u 33 www-data && groupmod -g 33 www-data

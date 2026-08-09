@@ -1,10 +1,11 @@
 FROM debian:bookworm
 
-# RUN apt update -y  && apt upgrade -y && apt install mariadb-server -y
+# RUN apt update -y   && apt install mariadb-server -y
 # RUN mean Executes a command while building the image.
-RUN apt update -y  && apt upgrade -y && apt install curl wget php8.2 php8.2-mysql php8.2-fpm mariadb-client -y
+RUN apt update -y && apt install curl wget php8.2 php8.2-mysql php8.2-fpm mariadb-client -y
 
 
+RUN curl -O https://raw.githubusercontent.com/wp-cli/builds/gh-pages/phar/wp-cli.phar &&  chmod +x wp-cli.phar &&  mv wp-cli.phar /usr/local/bin/wp
 # RUN curl -O https://raw.githubusercontent.com/wp-cli/builds/gh-pages/phar/wp-cli.phar && chmod +x wp-cli.phar && mv wp-cli.phar /usr/local/bin/wp
 #why ???
 # RUN usermod -u 33 www-data && groupmod -g 33 www-data

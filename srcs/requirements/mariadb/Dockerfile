@@ -1,8 +1,8 @@
 FROM debian:bookworm
 
-# RUN apt update -y  && apt upgrade -y && apt install mariadb-server -y
+# RUN apt update -y   && apt install mariadb-server -y
 # RUN mean Executes a command while building the image.
-RUN apt update -y  && apt upgrade -y && apt install -y mariadb-server mariadb-client
+RUN apt update -y && apt install -y mariadb-server mariadb-client
 
 RUN mkdir -p /run/mysqld && chown -R mysql:mysql /run/mysqld 
 # RUN rm -fr /var/lib/mysql/mysql
