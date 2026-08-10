@@ -9,7 +9,6 @@ if [ ! -f "/var/lib/mysql/.initialized" ]; then
 
     rm -fr /var/lib/mysql/*
 
-#    mysql_install_db --user=mysql --datadir=/var/lib/mysql
     mariadb-install-db --user=mysql --datadir=/var/lib/mysql
 
     mysqld --user=mysql --datadir=/var/lib/mysql --socket=/run/mysqld/mysqld.sock &
@@ -20,7 +19,6 @@ if [ ! -f "/var/lib/mysql/.initialized" ]; then
     echo "DB is ready"
     
     mysql --socket=/run/mysqld/mysqld.sock -u root << EOF
-ALTER USER 'root'@'localhost' IDENTIFIED BY '${MARIADB_ROOT_PASSWORD}';
 CREATE DATABASE IF NOT EXISTS \`${MARIADB_DATABASE}\`;
 CREATE USER IF NOT EXISTS '${MARIADB_USER}'@'%' IDENTIFIED BY '${MARIADB_PASSWORD}';
 GRANT ALL PRIVILEGES ON \`${MARIADB_DATABASE}\`.* TO '${MARIADB_USER}'@'%';
