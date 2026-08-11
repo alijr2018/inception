@@ -4,10 +4,11 @@ set -e
 
 echo "Start MariaDB"
 
-mkdir -p /run/mysqld && chown -R mysql:mysql /run/mysqld 
+mkdir -p /run/mysqld 
+chown -R mysql:mysql /run/mysqld 
 
 # if [ ! -f "/var/lib/mysql/.initialized" ]; then
-if [ ! -d "/var/lib/mysql/${MARIADB_DATABASE}" ]; then
+if [ ! -d "/var/lib/mysql/mysql" ]; then
     echo "Init DB"
 
     mariadb-install-db --user=mysql --datadir=/var/lib/mysql

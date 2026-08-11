@@ -17,7 +17,6 @@ COPY ./conf/ssl.sh /usr/local/bin/
 # RUN chmod +x /usr/local/bin/mariadb.sh
 RUN chmod +x /usr/local/bin/ssl.sh
 
-EXPOSE 443
 
 # seach more about healtcheck
 # HEALTHCHECK --interval=30s --timeout=30s  --retries=3 CMD [ "mariadb-admin", "ping", "-h", "localhost" ]
