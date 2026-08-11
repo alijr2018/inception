@@ -12,7 +12,7 @@ fi
 chown -R www-data:www-data /var/www/html
 
 
-until mysqladmin ping -h --silent; do
+until mysqladmin ping -h "$DB_HOST" --silent; do
     echo "Wait for mariadb"
     sleep 2
 done
