@@ -1,11 +1,11 @@
 services:
   mariadb:
-    image: incep_mariadb
+    image: incep_mariadb:1.0
     container_name: mariadb
     # image: mariadb #this will download offical mriadb for docker hub
     build: ./requirements/mariadb # means Go into requirements/mariadb/ and build the image using the Dockerfile found there.
     # restart: always #this form  https://hub.docker.com/_/mariadb
-    restart: unless-stopped
+    restart: on-failure
 
     environment:
       MARIADB_ROOT_PASSWORD : ${MARIADB_ROOT_PASSWORD}
@@ -20,9 +20,9 @@ services:
     networks:
       - inception
   nginx:
-    image: incep_nginx
+    image: incep_nginx:1.0
     container_name: nginx
-    restart: unless-stopped
+    restart: on-failure
 
     build: ./requirements/nginx
     ports:
@@ -38,9 +38,9 @@ services:
       - inception
   
   wordpress:
-    image: incep_wordpress
+    image: incep_wordpress:1.0
     container_name: wordpress
-    restart: unless-stopped
+    restart: on-failure
 
     build: ./requirements/wordpress
     depends_on:
