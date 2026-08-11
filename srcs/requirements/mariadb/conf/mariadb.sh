@@ -5,7 +5,7 @@ set -e
 echo "Start MariaDB"
 
 # if [ ! -f "/var/lib/mysql/.initialized" ]; then
-if [ ! -f "/var/lib/mysql/${inception}" ]; then
+if [ ! -d "/var/lib/mysql/${inception}" ]; then
     echo "Init DB"
 
     mariadb-install-db --user=mysql --datadir=/var/lib/mysql
