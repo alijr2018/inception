@@ -13,7 +13,13 @@ if [ ! -d "/var/lib/mysql/mysql" ]; then
 
     mariadb-install-db --user=mysql --datadir=/var/lib/mysql
 
+fi
+
     mysqld --user=mysql --datadir=/var/lib/mysql --socket=/run/mysqld/mysqld.sock &
+
+    until mariadb-admin --socket=/run/mysqld/mysqld.sock ping --silent; do
+        sleep 3
+    done
     
     mysql --socket=/run/mysqld/mysqld.sock -u root << EOF
 CREATE DATABASE IF NOT EXISTS \`${MARIADB_DATABASE}\`;
@@ -23,7 +29,6 @@ FLUSH PRIVILEGES;
 EOF
 
     mysqladmin --socket=/run/mysqld/mysqld.sock -u root shutdown
-fi
 
 echo "Start Mariadb .."
 
