@@ -2,8 +2,6 @@
 
 set -e
 
-# cat << EOF > /etc/nginx/conf.d/default.conf
-
 mkdir -p /etc/nginx/ssl
 
 openssl req -x509 -nodes -days 365 -newkey rsa:2048 -keyout /etc/nginx/ssl/we.key -out /etc/nginx/ssl/we.crt -subj "/C=MO/ST=KH/O=42/OU=42/CN=${DOMAIN_NAME}"
@@ -29,8 +27,6 @@ cat << EOF > /etc/nginx/conf.d/default.conf
 
 
 EOF
-
-
 
 nginx -t
 

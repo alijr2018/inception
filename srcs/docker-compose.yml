@@ -1,17 +1,18 @@
 services:
   mariadb:
-    image: incep_mariadb:1.0
+    image: mariadb:1.0
     container_name: mariadb
     # image: mariadb #this will download offical mriadb for docker hub
     build: ./requirements/mariadb # means Go into requirements/mariadb/ and build the image using the Dockerfile found there.
     # restart: always #this form  https://hub.docker.com/_/mariadb
     restart: on-failure
 
-    environment:
-      MARIADB_ROOT_PASSWORD : ${MARIADB_ROOT_PASSWORD}
-      MARIADB_DATABASE : ${MARIADB_DATABASE}
-      MARIADB_USER : ${MARIADB_USER}
-      MARIADB_PASSWORD : ${MARIADB_PASSWORD}
+    env_file: .env
+    # environment:
+      # MARIADB_ROOT_PASSWORD : ${MARIADB_ROOT_PASSWORD}
+      # MARIADB_DATABASE : ${MARIADB_DATABASE}
+      # MARIADB_USER : ${MARIADB_USER}
+      # MARIADB_PASSWORD : ${MARIADB_PASSWORD}
 
     # ports:
     #   - "3306:3306"
@@ -20,7 +21,7 @@ services:
     networks:
       - inception
   nginx:
-    image: incep_nginx:1.0
+    image: nginx:1.0
     container_name: nginx
     restart: on-failure
 
@@ -30,34 +31,38 @@ services:
       - "443:443"
     depends_on:
       - wordpress
-    environment:
-        DOMAIN_NAME: ${DOMAIN_NAME}
+    env_file: .env
+
+    # environment:
+        # DOMAIN_NAME: ${DOMAIN_NAME}
     volumes:
       - wordpress:/var/www/html
     networks:
       - inception
   
   wordpress:
-    image: incep_wordpress:1.0
+    image: wordpress:1.0
     container_name: wordpress
     restart: on-failure
 
     build: ./requirements/wordpress
     depends_on:
       - mariadb
-    environment:
-      DB_HOST: ${DB_HOST}
-      DB_NAME: ${DB_NAME}
-      DB_USER: ${DB_USER}
-      DB_PASS: ${DB_PASS}
-      WP_USER: ${WP_USER}
-      WP_USER_PASS: ${WP_USER_PASS}
-      WP_USER_EMAIL: ${WP_USER_EMAIL}
-      DOMAIN_NAME: ${DOMAIN_NAME}
-      WP_TITLE: ${WP_TITLE}
-      WP_ADMIN_USER: ${WP_ADMIN_USER}
-      WP_ADMIN_PASS: ${WP_ADMIN_PASS}
-      WP_ADMIN_EMAIL: ${WP_ADMIN_EMAIL}
+    env_file: .env
+
+    # environment:
+      # DB_HOST: ${DB_HOST}
+      # DB_NAME: ${DB_NAME}
+      # DB_USER: ${DB_USER}
+      # DB_PASS: ${DB_PASS}
+      # WP_USER: ${WP_USER}
+      # WP_USER_PASS: ${WP_USER_PASS}
+      # WP_USER_EMAIL: ${WP_USER_EMAIL}
+      # DOMAIN_NAME: ${DOMAIN_NAME}
+      # WP_TITLE: ${WP_TITLE}
+      # WP_ADMIN_USER: ${WP_ADMIN_USER}
+      # WP_ADMIN_PASS: ${WP_ADMIN_PASS}
+      # WP_ADMIN_EMAIL: ${WP_ADMIN_EMAIL}
     volumes:
       - wordpress:/var/www/html
     networks:
