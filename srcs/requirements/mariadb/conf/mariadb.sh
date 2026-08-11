@@ -4,6 +4,8 @@ set -e
 
 echo "Start MariaDB"
 
+mkdir -p /run/mysqld && chown -R mysql:mysql /run/mysqld 
+
 # if [ ! -f "/var/lib/mysql/.initialized" ]; then
 if [ ! -d "/var/lib/mysql/${MARIADB_DATABASE}" ]; then
     echo "Init DB"
