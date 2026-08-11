@@ -1,6 +1,10 @@
-all:
+# all:
+all: up
 # 	docker compose up -d // spinn all conatiner simultaneously
-	docker compose -f ./srcs/docker-compose.yml up -d 
+
+up:
+	mkdir -p  /home/$(USER)/data/mariadb /home/$(USER)/data/wordpress
+	docker compose -f ./srcs/docker-compose.yml up -d --build
 
 build:
 # 	docker compose build -d // whts diff between up and build
@@ -22,7 +26,7 @@ restart:
 
 clean:
 # 	docker compose down -v
-	docker compose -f ./srcs/docker-compose.yml down -v
+	docker compose -f ./srcs/docker-compose.yml down -v --rmi all
 # Remove all containers (including stopped ones)
 # 	docker rm -f $(docker ps -aq)
 # Remove all images
@@ -34,4 +38,11 @@ clean:
 # Remove build cache
 # 	docker builder prune -a -f
 #it rm all 
+# fclean: clean
+fclean: clean
+	sudo rm -fr /home/$(USER)/data
 	docker system prune -a --volumes -f
+
+re: fclean all
+
+.PHONY: all up build down stop restart clean fclean re

@@ -25,7 +25,9 @@ GRANT ALL PRIVILEGES ON \`${MARIADB_DATABASE}\`.* TO '${MARIADB_USER}'@'%';
 FLUSH PRIVILEGES;
 EOF
 
-    mysqladmin --socket=/run/mysqld/mysqld.sock -u root  -p"${MARIADB_ROOT_PASSWORD}"  shutdown
+    # mysqladmin --socket=/run/mysqld/mysqld.sock -u root  -p"${MARIADB_ROOT_PASSWORD}"  shutdown
+    mysqladmin --socket=/run/mysqld/mysqld.sock -u root shutdown
+
     touch /var/lib/mysql/.initialized
     echo "MariaDB initialization complete"
 

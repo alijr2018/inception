@@ -23,7 +23,7 @@ COPY ./conf/word.sh /
 # RUN chmod +x /usr/local/bin/mariadb.sh
 RUN chmod +x /word.sh
 
-EXPOSE 9000
+# EXPOSE 9000
 
 # seach more about healtcheck
 # HEALTHCHECK --interval=30s --timeout=30s  --retries=3 CMD [ "mariadb-admin", "ping", "-h", "localhost" ]

@@ -13,8 +13,8 @@ services:
       MARIADB_USER : ${MARIADB_USER}
       MARIADB_PASSWORD : ${MARIADB_PASSWORD}
 
-    ports:
-      - "3306:3306"
+    # ports:
+    #   - "3306:3306"
     volumes:
       - mariadb:/var/lib/mysql
     networks:
@@ -22,6 +22,7 @@ services:
   nginx:
     image: incep_nginx
     container_name: nginx
+    restart: unless-stopped
 
     build: ./requirements/nginx
     ports:
@@ -29,6 +30,8 @@ services:
       - "443:443"
     depends_on:
       - wordpress
+    environment:
+        DOMAIN_NAME: ${DOMAIN_NAME}
     volumes:
       - wordpress:/var/www/html
     networks:
@@ -37,6 +40,7 @@ services:
   wordpress:
     image: incep_wordpress
     container_name: wordpress
+    restart: unless-stopped
 
     build: ./requirements/wordpress
     depends_on:
