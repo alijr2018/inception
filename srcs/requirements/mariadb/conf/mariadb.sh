@@ -33,4 +33,5 @@ EOF
 
 echo "Start Mariadb .."
 
-exec mysqld --user=mysql --datadir=/var/lib/mysql --socket=/run/mysqld/mysqld.sock --bind-address=0.0.0.0
+exec "$@"
+# exec mysqld --user=mysql --datadir=/var/lib/mysql --socket=/run/mysqld/mysqld.sock --bind-address=0.0.0.0

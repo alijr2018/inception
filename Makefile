@@ -41,7 +41,8 @@ clean:
 # fclean: clean
 fclean: clean
 	sudo rm -fr /home/$(USER)/data
-	docker system prune -a --volumes -f
+# 	docker system prune -a --volumes -f
+	docker compose prune -a --volumes -f
 
 re: fclean all
 
