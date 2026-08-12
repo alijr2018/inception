@@ -32,7 +32,7 @@ cat << EOF > /etc/php/8.2/fpm/pool.d/www.conf
 listen = 0.0.0.0:9000
 
 pm = dynamic
-pm.maxchildren = 5
+pm.max_children = 5
 pm.start_servers = 3
 pm.min_spare_servers = 1
 pm.max_spare_servers = 10
