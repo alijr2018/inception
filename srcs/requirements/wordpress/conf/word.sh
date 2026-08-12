@@ -35,11 +35,10 @@ listen = 0.0.0.0:9000
 
 pm = dynamic
 pm.max_children = 5
-pm.start_servers = 3
+pm.start_servers = 2
 pm.min_spare_servers = 1
-pm.max_spare_servers = 10
+pm.max_spare_servers = 3
 
-clear_env = no
 EOF
 
 exec "$@"
