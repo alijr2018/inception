@@ -26,6 +26,17 @@ if ! wp --allow-root core is-installed --path=/var/www/html ; then
     wp --allow-root user create "${WP_USER}" "${WP_USER_EMAIL}" --role=author --user_pass="${WP_USER_PASS}" --path=/var/www/html
 fi
 
+cat << EOF > /etc/php/8.2/fpm/pool.d/www.conf
+[www]
 
-# exec php-fpm8.2 -F
+listen = 0.0.0.0:9000
+
+pm = dynamic
+pm.maxchildren = 5
+pm.start_servers = 3
+pm.min_spare_servers = 1
+pm.max_spare_servers = 10
+
+EOF
+
 exec "$@"

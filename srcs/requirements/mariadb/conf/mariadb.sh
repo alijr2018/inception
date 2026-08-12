@@ -27,11 +27,9 @@ GRANT ALL PRIVILEGES ON \`${DB_NAME}\`.* TO '${DB_USER}'@'%';
 FLUSH PRIVILEGES;
 EOF
 
-    # mysqladmin --socket=/run/mysqld/mysqld.sock -u root shutdown
     mysqladmin --socket=/run/mysqld/mysqld.sock shutdown
 
 
 echo "Start Mariadb .."
 
 exec "$@"
-# exec mysqld --user=mysql --datadir=/var/lib/mysql --socket=/run/mysqld/mysqld.sock --bind-address=0.0.0.0
