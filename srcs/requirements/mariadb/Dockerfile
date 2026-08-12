@@ -6,8 +6,6 @@ COPY ./conf/mariadb.sh /usr/local/bin/mariadb.sh
 
 RUN chmod +x /usr/local/bin/mariadb.sh
 
-HEALTHCHECK --interval=30s --timeout=30s  --retries=3 CMD [ "mariadb-admin", "ping", "-h", "localhost" ]
-
 ENTRYPOINT ["/usr/local/bin/mariadb.sh"]
 
 CMD ["mysqld",  "--user=mysql",  "--datadir=/var/lib/mysql",  "--socket=/run/mysqld/mysqld.sock", "--bind-address=0.0.0.0"]
