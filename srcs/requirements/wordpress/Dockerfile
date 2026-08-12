@@ -6,12 +6,10 @@ RUN apt update -y && apt install curl wget php8.2 php8.2-mysql php8.2-fpm mariad
 
 
 RUN curl -O https://raw.githubusercontent.com/wp-cli/builds/gh-pages/phar/wp-cli.phar &&  chmod +x wp-cli.phar &&  mv wp-cli.phar /usr/local/bin/wp
-# RUN curl -O https://raw.githubusercontent.com/wp-cli/builds/gh-pages/phar/wp-cli.phar && chmod +x wp-cli.phar && mv wp-cli.phar /usr/local/bin/wp
-#why ???
-# RUN usermod -u 33 www-data && groupmod -g 33 www-data
+
 
 RUN sed -i 's|^listen = .*|listen = 0.0.0.0:9000|' /etc/php/8.2/fpm/pool.d/www.conf
-
+# you could change this to just other way
 
 # RUN mkdir -p /run/mysqld && chown -R mysql:mysql /run/mysqld && chown 755 /var/run/mysqld
 # COPY conf/mariadb.cnf /etc/mysql/mariadb.conf.d/50-server.cnf
@@ -32,4 +30,5 @@ RUN chmod +x /word.sh
 # ENTRYPOINT ["nginx","-g", "daemon off;"]
 
 ENTRYPOINT [ "/word.sh" ]
+CMD [ "php-fpm8.2", "-F" ]
 # ENTRYPOINT ["/usr/local/bin/mariadb.sh"]

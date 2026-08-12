@@ -27,4 +27,5 @@ if ! wp --allow-root core is-installed --path=/var/www/html ; then
 fi
 
 
-exec php-fpm8.2 -F
+# exec php-fpm8.2 -F
+exec "$@"
