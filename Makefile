@@ -40,9 +40,9 @@ clean:
 #it rm all 
 # fclean: clean
 fclean: clean
-	sudo rm -fr /home/$(USER)/data
 # 	docker system prune -a --volumes -f
-	docker compose prune -a --volumes -f
+	docker compose -f ./srcs/docker-compose.yml  down --rmi all --volumes
+	sudo rm -fr /home/$(USER)/data
 
 re: fclean all
 
