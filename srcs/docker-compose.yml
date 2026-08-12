@@ -6,10 +6,10 @@ services:
     restart: on-failure
 
     environment:
-      MARIADB_ROOT_PASSWORD : ${DB_ROOT_PASSWORD}
-      MARIADB_DATABASE : ${DB_DATABASE}
-      MARIADB_USER : ${DB_USER}
-      MARIADB_PASSWORD : ${DB_PASS}
+      DB_ROOT_PASSWORD : ${DB_ROOT_PASSWORD}
+      DB_DATABASE : ${DB_DATABASE}
+      DB_USER : ${DB_USER}
+      DB_PASS : ${DB_PASS}
 
     volumes:
       - mariadb:/var/lib/mysql
