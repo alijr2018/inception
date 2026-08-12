@@ -26,7 +26,7 @@ if ! wp --allow-root core is-installed --path=/var/www/html ; then
     wp --allow-root user create "${WP_USER}" "${WP_USER_EMAIL}" --role=author --user_pass="${WP_USER_PASS}" --path=/var/www/html
 fi
 
-cat <<'EOF' > /etc/php/8.2/fpm/pool.d/www.conf
+cat << EOF > /etc/php/8.2/fpm/pool.d/www.conf
 [www]
 user = www-data
 group = www-data
