@@ -6,8 +6,7 @@ services:
     restart: on-failure
 
     environment:
-      DB_ROOT_PASSWORD : ${DB_ROOT_PASSWORD}
-      DB_DATABASE : ${DB_DATABASE}
+      DB_NAME : ${DB_NAME}
       DB_USER : ${DB_USER}
       DB_PASS : ${DB_PASS}
 
