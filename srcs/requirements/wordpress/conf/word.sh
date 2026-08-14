@@ -3,10 +3,7 @@
 set -e
 
 if [ ! -f /var/www/html/wp-load.php ]; then
-    cd /tmp
-    wget https://wordpress.org/latest.tar.gz
-    tar -xf latest.tar.gz
-    mv wordpress/* /var/www/html/
+    wp --allow-root core download --path=/var/www/html
 fi
 
 chown -R www-data:www-data /var/www/html
