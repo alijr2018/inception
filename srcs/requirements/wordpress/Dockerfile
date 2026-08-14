@@ -18,4 +18,3 @@ RUN chmod +x /word.sh
 
 
 ENTRYPOINT [ "/word.sh" ]
-CMD [ "php-fpm8.2", "-F" ]

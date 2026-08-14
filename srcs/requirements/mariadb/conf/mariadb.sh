@@ -16,7 +16,7 @@ if [ ! -d "/var/lib/mysql/mysql" ]; then
 fi
     mysqld --user=mysql --datadir=/var/lib/mysql --socket=/run/mysqld/mysqld.sock &
 
-    until mariadb-admin --socket=/run/mysqld/mysqld.sock ping --silent; do
+    until mariadb-admin ping --silent; do
         sleep 5
     done
     
@@ -32,4 +32,4 @@ EOF
 
 echo "Start Mariadb .."
 
-exec "$@"
+exec mysqld  --user=mysql  --datadir=/var/lib/mysql  --socket=/run/mysqld/mysqld.sock --bind-address=0.0.0.0
