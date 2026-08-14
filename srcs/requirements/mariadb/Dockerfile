@@ -2,8 +2,8 @@ FROM debian:bookworm
 
 RUN apt update -y && apt install -y mariadb-server mariadb-client
 
-COPY ./conf/mariadb.sh /usr/local/bin/mariadb.sh
+COPY ./conf/mariadb.sh /mariadb.sh
 
-RUN chmod +x /usr/local/bin/mariadb.sh
+RUN chmod +x /mariadb.sh
 
-ENTRYPOINT ["/usr/local/bin/mariadb.sh"]
+ENTRYPOINT ["/mariadb.sh"]
