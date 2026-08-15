@@ -1,60 +1,55 @@
-# User Documentation
+# User documentation
 
-This document is for the person who **uses or administers** the running stack. It does not
-require any knowledge of Docker internals. If you want to modify or rebuild the project,
-read `DEV_DOC.md` instead.
+This document is for whoever runs or administers the stack. It assumes no knowledge of Docker
+internals. To rebuild or modify the project, read `DEV_DOC.md` instead.
 
 ---
 
 ## 1. What the stack provides
 
-Starting the project gives you a fully working, self-hosted **WordPress website served over
-HTTPS**. Three services cooperate to do that:
+Starting the project gives you a self-hosted WordPress site served over HTTPS. Three services
+cooperate to produce it.
 
-| Service | What it does for you | Do you interact with it directly? |
+| Service | What it does for you | Do you deal with it directly? |
 |---|---|---|
-| **nginx** | The front door. Receives every HTTPS request on port 443, serves images/CSS/JS, hands PHP pages to WordPress. | Yes — indirectly, it is the address you type in the browser |
-| **wordpress** | Runs WordPress itself (PHP-FPM 8.2). Generates the pages, handles the admin panel, stores uploads. | Yes — through the website and the admin panel |
-| **mariadb** | The database. Stores posts, pages, comments, users, settings. | No — it is not reachable from outside |
+| `nginx` | The front door. Accepts every HTTPS request on port 443, serves images, CSS and JavaScript, hands PHP pages to WordPress | Yes, indirectly — it answers the address you type |
+| `wordpress` | Runs WordPress itself under php-fpm 8.2. Builds the pages, handles the admin panel, stores uploads | Yes, through the site and the admin panel |
+| `mariadb` | The database. Stores posts, pages, comments, users and settings | No — it is not reachable from outside |
 
 ```
-   You  ──HTTPS 443──▶  nginx  ──▶  wordpress  ──▶  mariadb
-                       (public)     (internal)      (internal)
+   You  ──HTTPS 443──▶  nginx  ────▶  wordpress  ────▶  mariadb
+                       (public)      (internal)        (internal)
 ```
 
-Everything else is closed. There is **no port 80**, no database port, no PHP port exposed on
-the machine.
+Nothing else is exposed. There is no port 80, no database port and no PHP port open on the
+machine.
 
 ---
 
 ## 2. Before the first launch
 
-Two things must be true on the host machine:
-
-**a. Docker is installed and running**
+**Docker must be installed and running:**
 
 ```bash
 docker --version && docker compose version
 ```
 
-**b. The domain points to the machine.** The site answers to the name `abrami.42.fr`, not to
+**The domain must resolve to this machine.** The site answers to `abrami.42.fr`, not to
 `localhost`. Add the mapping once:
 
 ```bash
 echo "127.0.0.1 abrami.42.fr" | sudo tee -a /etc/hosts
-```
-
-Check it:
-
-```bash
 ping -c1 abrami.42.fr        # must reply from 127.0.0.1
 ```
 
+If this entry is missing, every command below fails with `Could not resolve host` — which looks
+like the stack is broken when it is only the name lookup.
+
 ---
 
-## 3. Starting and stopping the project
+## 3. Starting and stopping
 
-All commands are run **from the root of the project** (the folder containing the `Makefile`).
+Run everything from the project root, the folder containing the `Makefile`.
 
 ### Start
 
@@ -62,23 +57,27 @@ All commands are run **from the root of the project** (the folder containing the
 make
 ```
 
-The first run takes several minutes: it builds the three images, downloads WordPress and
-initialises the database. Later runs start in a few seconds.
+The first run takes a few minutes: it builds three images, downloads WordPress and initialises
+the database. Later runs start in seconds because every initialisation step is skipped when its
+result already exists.
 
 ### Stop
 
-| Goal | Command | What happens to your data |
+| Goal | Command | Effect on your data |
 |---|---|---|
 | Pause the site, keep everything | `make stop` | Untouched |
-| Stop and remove the containers | `make down` | Untouched — volumes survive |
-| Remove containers, volumes and images | `make clean` | **Database and site content deleted** |
-| Full wipe, including host data folder | `make fclean` | **Everything deleted** |
+| Stop and remove the containers | `make down` | Untouched |
+| Also remove images and volume objects | `make clean` | The files under `/home/abrami/data` remain on disk |
+| Delete everything including the data | `make fclean` | Posts, users and uploads are gone permanently |
 
-> `make stop` and `make down` are safe. `make clean` and `make fclean` are destructive —
-> your posts, users and uploads are gone and WordPress reinstalls from scratch on the next
-> `make`.
+`make stop` and `make down` are safe. `make fclean` is destructive — WordPress reinstalls from
+scratch on the next `make`.
 
-### Restart after a change
+Note the distinction between `clean` and `fclean`: `clean` removes Docker's volume objects, but
+because those volumes are backed by a real directory, the files themselves survive at
+`/home/abrami/data`. Only `fclean` deletes them.
+
+### Restart
 
 ```bash
 make restart      # restart the running containers
@@ -87,52 +86,49 @@ make re           # full wipe and rebuild from zero
 
 ---
 
-## 4. Accessing the website and the admin panel
+## 4. Reaching the site and the admin panel
 
 | What | Address |
 |---|---|
-| Public website | **https://abrami.42.fr** |
-| Administration panel | **https://abrami.42.fr/wp-admin** |
-| Login page | **https://abrami.42.fr/wp-login.php** |
+| Public site | `https://abrami.42.fr` |
+| Administration panel | `https://abrami.42.fr/wp-admin` |
+| Login page | `https://abrami.42.fr/wp-login.php` |
 
 ### The certificate warning is expected
 
-The TLS certificate is **self-signed** — it was generated by the project itself, not bought
-from a certificate authority. Browsers therefore show a warning the first time
-("Your connection is not private" / "Potential security risk ahead").
+The TLS certificate is self-signed — generated by the project rather than issued by a certificate
+authority — so browsers warn on the first visit ("Your connection is not private", "Potential
+security risk ahead"). This is normal for a local project. Choose **Advanced → Continue to
+abrami.42.fr**.
 
-This is normal for a local project. Click **Advanced → Continue to abrami.42.fr**.
-
-The encryption itself is real: the connection uses TLSv1.2 or TLSv1.3, and nothing weaker is
-accepted. You can verify it:
+The encryption itself is real. Only TLSv1.2 and TLSv1.3 are accepted; nothing older is offered.
+To verify:
 
 ```bash
-# Must succeed
-openssl s_client -connect abrami.42.fr:443 -tls1_3 </dev/null 2>/dev/null | grep Protocol
-
-# Must FAIL — old protocols are refused
-openssl s_client -connect abrami.42.fr:443 -tls1_1 </dev/null
+nmap --script ssl-enum-ciphers -p 443 abrami.42.fr
 ```
+
+The output must list `TLSv1.2` and `TLSv1.3` sections and no `TLSv1.0` or `TLSv1.1` section at
+all.
 
 ### The two accounts
 
 WordPress is created with exactly two users:
 
-| Account | Role | What it can do |
+| Account | Role | Permissions |
 |---|---|---|
-| `abrami_manager` | **Administrator** | Everything: themes, plugins, settings, users, all content |
-| `abrami` | **Author** | Write, edit and publish its own posts only |
+| `abrami_manager` | Administrator | Everything — themes, plugins, settings, users, all content |
+| `abrami` | Author | Write, edit and publish its own posts only |
 
-Note that the administrator name deliberately contains neither `admin` nor `administrator`,
-as required by the project rules.
+The administrator name contains neither `admin` nor `administrator`, as the project rules require.
 
 ---
 
-## 5. Finding and managing credentials
+## 5. Credentials
 
 ### Where they live
 
-All credentials come from a single file: **`srcs/.env`**.
+All credentials come from `srcs/.env`:
 
 ```bash
 cat srcs/.env
@@ -140,39 +136,35 @@ cat srcs/.env
 
 | Variable | Used for |
 |---|---|
-| `WP_ADMIN_USER` / `WP_ADMIN_PASS` / `WP_ADMIN_EMAIL` | The WordPress administrator account |
-| `WP_USER` / `WP_USER_PASS` / `WP_USER_EMAIL` | The second WordPress account (author) |
-| `DB_USER` / `DB_PASS` | The database account WordPress connects with |
-| `DB_NAME` / `DB_HOST` | Name of the database and hostname of the database container |
-| `DOMAIN_NAME` / `WP_TITLE` | The site address and its title |
+| `WP_ADMIN_USER`, `WP_ADMIN_PASS`, `WP_ADMIN_EMAIL` | The WordPress administrator account |
+| `WP_USER`, `WP_USER_PASS`, `WP_USER_EMAIL` | The second WordPress account, role author |
+| `DB_USER`, `DB_PASS` | The database account WordPress connects with |
+| `DB_ROOT_PASSWORD` | The MariaDB `root` account |
+| `DB_NAME`, `DB_HOST` | The database name and the hostname of the database container |
+| `DOMAIN_NAME`, `WP_TITLE`, `LOGIN` | Site address, site title, and the user whose home directory stores the data |
 
-> **This file must never be committed to git.** It is listed in `.gitignore`. Publishing
-> credentials in a repository is an automatic failure of the project, and a real-world
-> security incident.
+This file must never be committed to git. It is listed in `.gitignore`. Publishing credentials in
+a repository fails the project and, outside school, is a genuine security incident.
 
 ### Changing a WordPress password
 
-Two ways:
+From the web interface, log in as the user and go to **Users → Profile → Set New Password**. The
+change takes effect immediately, but `.env` then no longer reflects reality.
 
-**From the web interface (recommended for daily use)** — log in as the user, go to
-*Users → Profile → Set New Password*. The change is immediate and permanent, but `.env`
-becomes out of date.
-
-**From the command line**, without touching the browser:
+From the command line:
 
 ```bash
 docker exec -it wordpress wp --allow-root user update abrami_manager \
     --user_pass='NewStrongPassword' --path=/var/www/html
 ```
 
-### Changing the credentials used at first install
+### Changing the values used at installation
 
-The values in `.env` are only applied when WordPress is installed for the first time.
-Editing `.env` on an existing installation changes nothing. To apply new values you must
-reinstall from scratch:
+The values in `.env` are applied only when WordPress is installed for the first time. Editing
+`.env` on an existing installation changes nothing. To apply new values:
 
 ```bash
-make fclean && make      # WARNING: deletes all site content
+make fclean && make      # deletes all site content
 ```
 
 ---
@@ -185,17 +177,18 @@ make fclean && make      # WARNING: deletes all site content
 docker ps
 ```
 
-Expected: three lines, named `nginx`, `wordpress` and `mariadb`, all with status `Up`.
+Expect three lines — `nginx`, `wordpress`, `mariadb` — all showing `Up`, with only nginx
+publishing a port:
 
 ```
-CONTAINER ID   IMAGE             STATUS         PORTS                    NAMES
-xxxxxxxxxxxx   nginx:1.0         Up 2 minutes   0.0.0.0:443->443/tcp     nginx
-xxxxxxxxxxxx   wordpress:1.0     Up 2 minutes                            wordpress
-xxxxxxxxxxxx   mariadb:1.0       Up 2 minutes                            mariadb
+CONTAINER ID   IMAGE           STATUS         PORTS                    NAMES
+xxxxxxxxxxxx   nginx:1.0       Up 2 minutes   0.0.0.0:443->443/tcp     nginx
+xxxxxxxxxxxx   wordpress:1.0   Up 2 minutes                            wordpress
+xxxxxxxxxxxx   mariadb:1.0     Up 2 minutes                            mariadb
 ```
 
-A container **missing from this list**, or one that keeps restarting, means the service
-crashed. Look at its logs:
+A container missing from the list, or one restarting repeatedly, means the service crashed. Read
+its output:
 
 ```bash
 docker logs nginx
@@ -203,50 +196,59 @@ docker logs wordpress
 docker logs mariadb
 ```
 
-### Is the website answering?
+### Is the site answering?
 
 ```bash
 curl -Ik https://abrami.42.fr
 ```
 
-`HTTP/1.1 200 OK` means the whole chain — NGINX → PHP-FPM → MariaDB — is working. The `-k`
-flag tells curl to accept the self-signed certificate.
+`HTTP/1.1 200 OK` proves the whole chain works — NGINX accepted the TLS connection, php-fpm
+executed WordPress, and WordPress reached MariaDB. The `-k` flag tells curl to accept the
+self-signed certificate.
 
-### Is the database alive and populated?
+A second useful check:
+
+```bash
+curl -Ik https://abrami.42.fr/wp-admin/
+```
+
+This should return `302 Found` with a `Location` header pointing at `https://.../wp-login.php`.
+The `https` in that redirect confirms WordPress knows it is served over TLS.
+
+### Is the database populated?
 
 ```bash
 docker exec -it mariadb mariadb -u abrami -p -e "SHOW TABLES;" inception
 ```
 
-Enter the password from `DB_PASS`. You should see the standard WordPress tables
-(`wp_posts`, `wp_users`, `wp_options`, …).
+Enter the value of `DB_PASS`. You should see the standard WordPress tables — `wp_posts`,
+`wp_users`, `wp_options` and the rest.
 
-### Is the data really persistent?
+### Does the data really persist?
 
-This is the easiest way to prove the volumes work:
+1. Publish a post on the site.
+2. `make down` — the containers are destroyed.
+3. `make` — the containers are recreated.
+4. Reload the site. The post is still there.
 
-1. Publish a post on the website.
-2. `make down` — containers destroyed.
-3. `make` — containers recreated.
-4. Reload the site: **the post is still there.**
-
-The files themselves are visible on the host at any time:
+The files are visible on the host at any time:
 
 ```bash
-ls /home/abrami/data/wordpress    # site files, themes, uploads
+ls /home/abrami/data/wordpress    # WordPress core, themes, uploads
 ls /home/abrami/data/mariadb      # database files
 ```
 
 ---
 
-## 7. Quick troubleshooting
+## 7. Troubleshooting
 
-| Symptom | Likely cause | Fix |
+| Symptom | Likely cause | What to do |
 |---|---|---|
-| Browser cannot find the site | `/etc/hosts` entry missing | `echo "127.0.0.1 abrami.42.fr" \| sudo tee -a /etc/hosts` |
-| "Connection refused" on 443 | The nginx container is not running | `docker ps`, then `docker logs nginx` |
-| Certificate warning | Self-signed certificate | Expected — accept it and continue |
-| "Error establishing a database connection" | MariaDB not ready or wrong credentials | `docker logs mariadb`, check `DB_USER` / `DB_PASS` in `.env` |
-| White page / HTTP 502 | php-fpm is down | `docker logs wordpress` |
-| Site works but sub-pages return 404 | WordPress permalink rules | *Settings → Permalinks → Save* in the admin panel |
-| Port 443 already in use | Another web server on the host | `sudo ss -lntp \| grep :443` and stop it |
+| `Could not resolve host` | No `/etc/hosts` entry | `echo "127.0.0.1 abrami.42.fr" \| sudo tee -a /etc/hosts` |
+| Connection refused on 443 | The nginx container is not running | `docker ps`, then `docker logs nginx` |
+| Certificate warning in the browser | Self-signed certificate | Expected — accept and continue |
+| "Error establishing a database connection" | MariaDB not ready, or credentials mismatched | `docker logs mariadb`; check `DB_USER` and `DB_PASS` |
+| Blank page or HTTP 502 | php-fpm is not answering | `docker logs wordpress` |
+| The wordpress container logs "Wait for mariadb" forever | The database user does not exist — usually leftover data in `/home/abrami/data/mariadb` from an earlier run | `docker exec -it mariadb mariadb -e "SELECT user,host FROM mysql.user;"`; if the user is missing, `make fclean && make` |
+| Sub-pages return 404 while the home page works | Permalink rewriting | Confirm `location /` with `try_files` exists in the nginx config; then re-save **Settings → Permalinks** |
+| Port 443 already in use | Another web server on the host | `sudo ss -lntp \| grep :443`, then stop it |

@@ -23,7 +23,6 @@ clean:
 	docker compose -f ./srcs/docker-compose.yml down -v --rmi all
 
 fclean: clean
-	docker compose -f ./srcs/docker-compose.yml  down --rmi all --volumes
 	sudo rm -fr /home/${USER}/data
 
 re: fclean all
