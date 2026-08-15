@@ -2,7 +2,7 @@
 all: up
 
 up: build
-	mkdir -p  /home/${USER}/data/mariadb /home/${USER}/data/wordpress
+	mkdir -p  /home/abrami/data/mariadb /home/abrami/data/wordpress
 	docker compose -f ./srcs/docker-compose.yml up -d
 
 build:
@@ -23,7 +23,7 @@ clean:
 	docker compose -f ./srcs/docker-compose.yml down -v --rmi all
 
 fclean: clean
-	sudo rm -fr /home/${USER}/data
+	sudo rm -fr /home/abrami/data
 
 re: fclean all
 

@@ -34,16 +34,6 @@ machine.
 docker --version && docker compose version
 ```
 
-**The domain must resolve to this machine.** The site answers to `abrami.42.fr`, not to
-`localhost`. Add the mapping once:
-
-```bash
-echo "127.0.0.1 abrami.42.fr" | sudo tee -a /etc/hosts
-ping -c1 abrami.42.fr        # must reply from 127.0.0.1
-```
-
-If this entry is missing, every command below fails with `Could not resolve host` — which looks
-like the stack is broken when it is only the name lookup.
 
 ---
 
@@ -101,15 +91,6 @@ authority — so browsers warn on the first visit ("Your connection is not priva
 security risk ahead"). This is normal for a local project. Choose **Advanced → Continue to
 abrami.42.fr**.
 
-The encryption itself is real. Only TLSv1.2 and TLSv1.3 are accepted; nothing older is offered.
-To verify:
-
-```bash
-nmap --script ssl-enum-ciphers -p 443 abrami.42.fr
-```
-
-The output must list `TLSv1.2` and `TLSv1.3` sections and no `TLSv1.0` or `TLSv1.1` section at
-all.
 
 ### The two accounts
 
@@ -139,24 +120,9 @@ cat srcs/.env
 | `WP_ADMIN_USER`, `WP_ADMIN_PASS`, `WP_ADMIN_EMAIL` | The WordPress administrator account |
 | `WP_USER`, `WP_USER_PASS`, `WP_USER_EMAIL` | The second WordPress account, role author |
 | `DB_USER`, `DB_PASS` | The database account WordPress connects with |
-| `DB_ROOT_PASSWORD` | The MariaDB `root` account |
 | `DB_NAME`, `DB_HOST` | The database name and the hostname of the database container |
-| `DOMAIN_NAME`, `WP_TITLE`, `LOGIN` | Site address, site title, and the user whose home directory stores the data |
+| `DOMAIN_NAME`, `WP_TITLE` | Site address, site title |
 
-This file must never be committed to git. It is listed in `.gitignore`. Publishing credentials in
-a repository fails the project and, outside school, is a genuine security incident.
-
-### Changing a WordPress password
-
-From the web interface, log in as the user and go to **Users → Profile → Set New Password**. The
-change takes effect immediately, but `.env` then no longer reflects reality.
-
-From the command line:
-
-```bash
-docker exec -it wordpress wp --allow-root user update abrami_manager \
-    --user_pass='NewStrongPassword' --path=/var/www/html
-```
 
 ### Changing the values used at installation
 
@@ -182,9 +148,9 @@ publishing a port:
 
 ```
 CONTAINER ID   IMAGE           STATUS         PORTS                    NAMES
-xxxxxxxxxxxx   nginx:1.0       Up 2 minutes   0.0.0.0:443->443/tcp     nginx
-xxxxxxxxxxxx   wordpress:1.0   Up 2 minutes                            wordpress
-xxxxxxxxxxxx   mariadb:1.0     Up 2 minutes                            mariadb
+xxxxxxxxxxxx   nginx:1.0       Up x minutes   0.0.0.0:443->443/tcp     nginx
+xxxxxxxxxxxx   wordpress:1.0   Up x minutes                            wordpress
+xxxxxxxxxxxx   mariadb:1.0     Up x minutes                            mariadb
 ```
 
 A container missing from the list, or one restarting repeatedly, means the service crashed. Read
@@ -196,33 +162,6 @@ docker logs wordpress
 docker logs mariadb
 ```
 
-### Is the site answering?
-
-```bash
-curl -Ik https://abrami.42.fr
-```
-
-`HTTP/1.1 200 OK` proves the whole chain works — NGINX accepted the TLS connection, php-fpm
-executed WordPress, and WordPress reached MariaDB. The `-k` flag tells curl to accept the
-self-signed certificate.
-
-A second useful check:
-
-```bash
-curl -Ik https://abrami.42.fr/wp-admin/
-```
-
-This should return `302 Found` with a `Location` header pointing at `https://.../wp-login.php`.
-The `https` in that redirect confirms WordPress knows it is served over TLS.
-
-### Is the database populated?
-
-```bash
-docker exec -it mariadb mariadb -u abrami -p -e "SHOW TABLES;" inception
-```
-
-Enter the value of `DB_PASS`. You should see the standard WordPress tables — `wp_posts`,
-`wp_users`, `wp_options` and the rest.
 
 ### Does the data really persist?
 
@@ -239,16 +178,3 @@ ls /home/abrami/data/mariadb      # database files
 ```
 
 ---
-
-## 7. Troubleshooting
-
-| Symptom | Likely cause | What to do |
-|---|---|---|
-| `Could not resolve host` | No `/etc/hosts` entry | `echo "127.0.0.1 abrami.42.fr" \| sudo tee -a /etc/hosts` |
-| Connection refused on 443 | The nginx container is not running | `docker ps`, then `docker logs nginx` |
-| Certificate warning in the browser | Self-signed certificate | Expected — accept and continue |
-| "Error establishing a database connection" | MariaDB not ready, or credentials mismatched | `docker logs mariadb`; check `DB_USER` and `DB_PASS` |
-| Blank page or HTTP 502 | php-fpm is not answering | `docker logs wordpress` |
-| The wordpress container logs "Wait for mariadb" forever | The database user does not exist — usually leftover data in `/home/abrami/data/mariadb` from an earlier run | `docker exec -it mariadb mariadb -e "SELECT user,host FROM mysql.user;"`; if the user is missing, `make fclean && make` |
-| Sub-pages return 404 while the home page works | Permalink rewriting | Confirm `location /` with `try_files` exists in the nginx config; then re-save **Settings → Permalinks** |
-| Port 443 already in use | Another web server on the host | `sudo ss -lntp \| grep :443`, then stop it |

@@ -18,19 +18,53 @@ communicate over a private bridge network.
 | `wordpress` | WordPress core run by php-fpm 8.2. No web server inside | `debian:bookworm` | `9000`, network-internal only |
 | `mariadb` | Database engine holding the WordPress database | `debian:bookworm` | `3306`, network-internal only |
 
+### Architecture
+
+```
+                              HOST MACHINE
+   ┌───────────────────────────────────────────────────────────────┐
+   │                                                               │
+   │  Browser ───── https://abrami.42.fr ─────┐                    │
+   │  (/etc/hosts → 127.0.0.1)                │ 443                │
+   │                                          ▼                    │
+   │   ╔═══════════ docker network: inception (bridge) ═════════╗   │
+   │   ║                                                        ║   │
+   │   ║   ┌────────────┐   fastcgi    ┌──────────────┐         ║   │
+   │   ║   │   nginx    │──── 9000 ───▶│  wordpress   │         ║   │
+   │   ║   │ TLS 1.2/3  │              │   php-fpm    │         ║   │
+   │   ║   └─────┬──────┘              └──────┬───────┘         ║   │
+   │   ║         │ static files               │ mysql 3306      ║   │
+   │   ║         │                            ▼                 ║   │
+   │   ║         │                     ┌──────────────┐         ║   │
+   │   ║         │                     │   mariadb    │         ║   │
+   │   ║         │                     └──────┬───────┘         ║   │
+   │   ╚═════════╪════════════════════════════╪═════════════════╝   │
+   │             │                            │                     │
+   │      volume │ wordpress           volume │ mariadb             │
+   │             ▼                            ▼                     │
+   │   /home/abrami/data/wordpress   /home/abrami/data/mariadb      │
+   └───────────────────────────────────────────────────────────────┘
+```
+
+Only 443 crosses the host boundary. Ports 9000 and 3306 exist only inside the `inception`
+network and are never published.
 
 ## Instructions
 
 ### Prerequisites
 
-* A Linux virtual machine with `docker`, and `make`.
-* Your user must be able to run Docker.
+* A Linux virtual machine with `docker`, the Compose v2 plugin, and `make`.
+* Your user must be able to run Docker (member of the `docker` group).
 * The domain must resolve locally:
+
+```bash
+echo "127.0.0.1 abrami.42.fr" | sudo tee -a /etc/hosts
+```
 
 ### Configuration
 
-Create `srcs/.env`.
-The full list of variables is in `DEV_DOC.md`.
+Create `srcs/.env`. It is listed in `.gitignore` and is never committed. The full list of
+variables is in `DEV_DOC.md`.
 
 ### Build and run
 
@@ -56,17 +90,28 @@ accept it and continue.
 
 ### Why Docker is used here
 
-Each service is packaged with exactly the dependencies it needs and nothing more.
-The Dockerfile is a reproducible build recipe, so the entire infrastructure can be destroyed and rebuilt identically with one command.
-The infrastructure is described as files in a git repository rather than as a sequence of manual steps performed on a server.
+Each service is packaged with exactly the dependencies it needs and nothing more. The Dockerfile
+is a reproducible build recipe, so the entire infrastructure can be destroyed and rebuilt
+identically with one command. The infrastructure is described as files in a git repository
+rather than as a sequence of manual steps performed on a server.
 
+### Sources included in the project
+
+| Element | Origin |
+|---|---|
+| Base OS | `debian:bookworm` — Debian 12, the penultimate stable release (Debian 13 "trixie" being current) |
+| NGINX, OpenSSL | Debian `apt` repositories |
+| PHP 8.2, php8.2-fpm, php8.2-mysql | Debian `apt` repositories |
+| MariaDB server and client | Debian `apt` repositories |
+| `wp-cli` | `wp-cli.phar` downloaded from the wp-cli builds branch on GitHub at image build time |
+| WordPress core | Downloaded from wordpress.org by `wp core download` at container start |
+| TLS certificate | Generated at container start by `openssl req -x509` (self-signed) |
 
 ### Main design choices
 
 **1. One service per container, and that service is PID 1.**
 
-Each container has an `ENTRYPOINT` pointing at a shell script.
-Every script performs its
+Each container has an `ENTRYPOINT` pointing at a shell script. Every script performs its
 initialisation and then hands over with `exec`:
 
 * `ssl.sh` ends with `exec nginx -g "daemon off;"`
@@ -80,13 +125,18 @@ makes the failure visible and lets the restart policy act. Each daemon is also r
 foreground (`daemon off`, `-F`, no `--daemonize`) because a container has no init system to
 supervise a background process.
 
+No `tail -f`, `sleep infinity`, `while true` or bare `bash` is used to keep any container alive.
+Those patterns are forbidden by the subject, and they hide failures: the container reports
+healthy while the service behind it is dead.
+
 **2. Initialisation is idempotent and guarded.**
 
+Every startup step is wrapped in an existence test, so a second `make` on populated volumes skips
 initialisation and starts in seconds:
 
 * `mariadb.sh` runs `mariadb-install-db` only if `/var/lib/mysql/mysql` is absent, and runs the
-  database provisioning only if `/var/lib/mysql/$DB_NAME` is absent.
-  The two tests are separate on purpose — a datadir can exist without the project's database inside it.
+  database provisioning only if `/var/lib/mysql/$DB_NAME` is absent. The two tests are separate
+  on purpose — a datadir can exist without the project's database inside it.
 * `word.sh` downloads WordPress only if `wp-load.php` is absent, writes `wp-config.php` only if
   it is absent, and installs only if `wp core is-installed` returns false.
 * `ssl.sh` generates the certificate only if `we.crt` is absent.
@@ -96,23 +146,33 @@ initialises a datadir during `apt install`, and Docker copies image content into
 volume on first mount — without clearing it, the guard would see a pre-existing datadir and the
 project's own initialisation would never run.
 
-**3. Two-phase MariaDB .**
+**3. Two-phase MariaDB bootstrap.**
 
-`mariadb-install-db` only writes the system tables.
-
-Creating a database, a user and its grants requires a running server, so `mariadb.sh` starts a temporary `mysqld` in the background, waits for it to answer, issues the SQL, and shuts it down cleanly. Only then does `exec` launch the long-running server as PID 1.
-The background process exists for a few seconds during first boot only and is not a way of keeping the container alive.
+`mariadb-install-db` only writes the system tables. Creating a database, a user and its grants
+requires a running server, so `mariadb.sh` starts a temporary `mysqld` in the background, waits
+for it to answer, issues the SQL, and shuts it down cleanly. Only then does `exec` launch the
+long-running server as PID 1. The background process exists for a few seconds during first boot
+only and is not a way of keeping the container alive.
 
 **4. `depends_on` is ordering, not readiness.**
 
-Compose's `depends_on` guarantees start order but says nothing about whether a service is ready to accept connections.
-`word.sh` therefore polls with `mysqladmin ping` using the project's database credentials before running `wp config create`.
-Authenticating with `$DB_USER` rather than pinging anonymously means the loop waits for the user to exist, not merely for the server socket to open.
+Compose's `depends_on` guarantees start order but says nothing about whether a service is ready
+to accept connections. `word.sh` therefore polls with `mysqladmin ping` using the project's
+database credentials before running `wp config create`. Authenticating with `$DB_USER` rather
+than pinging anonymously means the loop waits for the user to exist, not merely for the server
+socket to open.
 
+**5. The WordPress volume is mounted in two containers.**
 
-**5. No credential is written into any image.**
+php-fpm executes the PHP files and NGINX serves the static assets — CSS, JavaScript, images,
+uploads — from the same directory. Without the shared mount, every static request would return
+404 while PHP pages rendered normally.
 
-Passwords reach the containers as environment variables at run time, read from `srcs/.env` by Compose.
+**6. No credential is written into any image.**
+
+Passwords reach the containers as environment variables at run time, read from `srcs/.env` by
+Compose. Nothing sensitive appears in a Dockerfile, so nothing sensitive is baked into an image
+layer where `docker history` would reveal it.
 
 ### Virtual Machines vs Docker
 
@@ -216,4 +276,18 @@ require deleting that directory, which is what `make fclean` does.
 
 **Use of AI**
 
-AI was used as an explainer.
+AI was used as an explainer and as a reviewer, not as the author of the project's logic:
+
+* **Understanding concepts** — why `exec` in an entrypoint determines which process becomes PID 1
+  and therefore which process receives SIGTERM; how Docker's `local` volume driver behaves with
+  the `device` option; the difference between environment variables and mounted secrets.
+* **Reviewing the configuration** — a critical read of `docker-compose.yml`, the Dockerfiles and
+  the entrypoint scripts against the subject's constraints. This surfaced issues that were then
+  reproduced and fixed: the Debian MariaDB package shipping a pre-initialised datadir that
+  silently bypassed the project's own initialisation; `wp core install` being given a URL without
+  a scheme, which made WordPress emit `http://` redirects on an HTTPS-only site; and the packaged
+  `sites-enabled/default` server block listening on port 80 inside the NGINX container.
+* **Drafting documentation** — a first structure for this file, `USER_DOC.md` and `DEV_DOC.md`.
+
+Every suggestion was tested on the machine before being kept, and every claim in this
+documentation was checked against the files it describes.
