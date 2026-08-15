@@ -17,7 +17,6 @@ stop:
 start:
 	docker compose -f ./srcs/docker-compose.yml start
 
-
 restart:
 	docker compose -f ./srcs/docker-compose.yml restart
 

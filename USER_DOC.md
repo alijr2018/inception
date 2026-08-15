@@ -163,26 +163,11 @@ docker logs mariadb
 ```
 
 
-### Does the data really persist?
-
-1. Publish a post on the site.
-2. `make down` — the containers are destroyed.
-3. `make` — the containers are recreated.
-4. Reload the site. The post is still there.
-
-The files are visible on the host at any time:
-
-```bash
-ls /home/abrami/data/wordpress    # WordPress core, themes, uploads
-ls /home/abrami/data/mariadb      # database files
-```
-
----
 ### Changing a credential
 
 **A WordPress password**, live, without touching `.env`:
 
-​```bash
+​```
 docker exec -it wordpress wp --allow-root user update abrami_manager \
     --user_pass='NewStrongPassword' --path=/var/www/html
 ​```

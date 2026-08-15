@@ -16,7 +16,6 @@ fi
 if [ ! -d "/var/lib/mysql/${DB_NAME}" ]; then
     mysqld --user=mysql --datadir=/var/lib/mysql --bind-address=0.0.0.0 &
 
-
     until mariadb-admin ping --silent; do
         sleep 5
     done

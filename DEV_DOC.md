@@ -44,13 +44,6 @@ drives `docker compose -f ./srcs/docker-compose.yml`.
 
 Inside the virtual machine:
 
-```bash
-sudo apt update
-sudo apt install -y docker.io docker-compose-plugin make
-sudo usermod -aG docker $USER
-docker compose version
-```
-
 ### 2.2 Local DNS
 
 ```bash
@@ -171,23 +164,6 @@ Confirming the guards actually fire is worth doing after any change to the Maria
 `make re` must print `INIT DB` in `docker logs mariadb`. If it does not, the datadir was
 pre-populated — see the note in section 6.
 
-### 3.4 Why every entrypoint ends with `exec`
-
-`exec` replaces the shell process image with the daemon instead of forking a child. The daemon
-therefore inherits PID 1, which has three consequences:
-
-1. `docker stop` sends SIGTERM to PID 1, so the service performs a clean shutdown rather than
-   being killed after the grace period. For MariaDB in particular, that is the difference between
-   a clean shutdown and InnoDB recovery on the next start.
-2. If the service dies, PID 1 dies, the container exits, and the restart policy can act. With a
-   shell as PID 1 the container would stay "up" while the service behind it was dead.
-3. No intermediate shell remains to accumulate zombie children.
-
-Each daemon is also started in the foreground — `daemon off` for NGINX, `-F` for php-fpm, plain
-`mysqld` rather than `mysqld_safe`. A container has no init system to supervise a backgrounded
-process, so a daemonising service would exit immediately and take the container with it. This is
-also why none of the forbidden keep-alive tricks appear anywhere in the project.
-
 ---
 
 ## 4. Managing containers, network and volumes
@@ -271,12 +247,5 @@ a genuinely clean slate.
 | Edited `.env` | `make down && make` |
 | Edited an `.env` value used only at install (WordPress users, database name) | `make fclean && make` |
 | Added a service | New directory under `requirements/`, new Dockerfile, new block in `docker-compose.yml` |
-
-**One trap worth knowing.** Debian's `mariadb-server` package initialises a datadir during `apt
-install`, so the image contains a populated `/var/lib/mysql`. Docker copies image content into an
-empty named volume on first mount, which would make the initialisation guard in `mariadb.sh` see
-a pre-existing datadir and skip the project's own bootstrap. The MariaDB Dockerfile therefore
-clears the directory after installing the package. If `INIT DB` stops appearing in the logs after
-a clean `make re`, that line has gone missing.
 
 ---

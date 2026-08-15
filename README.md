@@ -204,7 +204,7 @@ require deleting that directory, which is what `make fclean` does.
 * Docker documentation — [Dockerfile best practices](https://docs.docker.com/build/building/best-practices/)
 * Docker documentation — [Compose file reference](https://docs.docker.com/reference/compose-file/)
 * Docker documentation — [Volumes](https://docs.docker.com/engine/storage/volumes/) and [Networking](https://docs.docker.com/engine/network/)
-* [Docker and the PID 1 zombie reaping problem](https://blog.phusion.nl/2015/01/20/docker-and-the-pid-1-zombie-reaping-problem/)
+
 
 **Services**
 
@@ -216,4 +216,4 @@ require deleting that directory, which is what `make fclean` does.
 
 **Use of AI**
 
-AI was used as an explainer.
+AI was used as an aid to understand, explain, and clarify the project requirements.
