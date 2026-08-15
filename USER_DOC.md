@@ -178,3 +178,16 @@ ls /home/abrami/data/mariadb      # database files
 ```
 
 ---
+### Changing a credential
+
+**A WordPress password**, live, without touching `.env`:
+
+​```bash
+docker exec -it wordpress wp --allow-root user update abrami_manager \
+    --user_pass='NewStrongPassword' --path=/var/www/html
+​```
+
+**A database credential or admin email** — these are only applied at install time, so update
+`.env` first, then see "Changing the values used at installation" below.
+
+---
